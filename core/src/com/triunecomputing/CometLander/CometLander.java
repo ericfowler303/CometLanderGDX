@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -25,9 +26,12 @@ public class CometLander extends ApplicationAdapter {
 	long startAnimationTime = -1; // init with null time value
 	World moonWorld;
 	SpriteBatch batch;
-	Sprite spaceship;
+	// The Star variables
 	ArrayList<Sprite> StarList = new ArrayList<Sprite>();
 	Sprite star;
+	// The Spaceship variables
+	Sprite spaceship;
+	Body spaceShipBody;
 	Texture ship;
 	Texture ship1;
 	Texture ship2;
@@ -35,20 +39,11 @@ public class CometLander extends ApplicationAdapter {
 	
 	@Override
 	public void create () {
-		/*Box2D.init(); // Needed to start using physics
+		Box2D.init(); // Needed to start using physics
 		// Acceleration due to gravity on the moon is 1.62 m/s^2, use that value for the world gravity setting
 		// Create the World to reflect that gravity
 		moonWorld = new World(new Vector2(0,-1.62f),true);
 
-		// Create the body to represent the moon surface
-		BodyDef moonBodyDef = new BodyDef();
-		moonBodyDef.type = BodyDef.BodyType.StaticBody;
-		moonBodyDef.position.set(new Vector2(0,10));
-		Body moonBody = moonWorld.createBody(moonBodyDef);
-		PolygonShape moonBox = new PolygonShape();
-		moonBox.setAsBox(Gdx.graphics.getWidth()/2, 100f);
-		moonBody.createFixture(moonBox, 0.0f);
-		moonBox.dispose();*/
 		Gdx.input.setInputProcessor(new InputAdapter() {
 			public boolean touchDown (int x, int y, int pointer, int button) {
 				// Save the first time that the user touches the screen
@@ -91,7 +86,14 @@ public class CometLander extends ApplicationAdapter {
 		// Make the spaceship and place it at the top center
 		spaceship = new Sprite(ship);
 		spaceship.setScale(0.3f);
-		spaceship.setPosition((Gdx.graphics.getWidth()/2)-(spaceship.getWidth()/2),Gdx.graphics.getHeight()-(spaceship.getHeight()*0.7f));
+
+
+		// Create the body definition to hold the spaceship to interact with the world
+		BodyDef spaceShipBodyDef = new BodyDef();
+		spaceShipBodyDef.type = BodyDef.BodyType.DynamicBody;
+		spaceShipBodyDef.position.set((Gdx.graphics.getWidth()/2)-(spaceship.getWidth()/2),Gdx.graphics.getHeight()-(spaceship.getHeight()*0.7f));
+		spaceShipBody = moonWorld.createBody(spaceShipBodyDef);
+
 	}
 
 	@Override
@@ -103,14 +105,23 @@ public class CometLander extends ApplicationAdapter {
 		for(Sprite starSprite : StarList) {
 			starSprite.draw(batch);
 		}
-		// Animate the spaceship based on input
+		// Update spaceship position before checking which image it should have
+		UpdateSpaceshipLocation();
+
+		// Animate the spaceship image based on touch input
 		ChangeSpaceshipTexture(startAnimationTime);
 
 		batch.end();
 		// update the physics at 60fps regardless of rendering speed
-		//moonWorld.step(1/60f, 6, 2);
+		moonWorld.step(1/60f, 6, 2);
 	}
 
+	private void UpdateSpaceshipLocation() {
+		// Update sprite position based on it's physics body
+		spaceship.setPosition(spaceShipBody.getPosition().x, spaceShipBody.getPosition().y);
+		// Update sprite rotation based on it's physics body
+		spaceship.setRotation(MathUtils.radiansToDegrees * spaceShipBody.getAngle());
+	}
 	private void ChangeSpaceshipTexture(long startAnimationTime) {
 		// Draw the frame based on how long the user has touched the screen
 		if(startAnimationTime == -1) {
