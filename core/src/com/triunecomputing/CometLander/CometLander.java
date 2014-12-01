@@ -19,6 +19,7 @@ import java.util.Random;
 import java.util.Date;
 
 public class CometLander extends ApplicationAdapter {
+	private static final String TAG = "CometLander";
 	Random rng = new Random();
 	Date timeObj = new Date();
 	long startAnimationTime = -1; // init with null time value
@@ -50,6 +51,7 @@ public class CometLander extends ApplicationAdapter {
 		moonBox.dispose();*/
 		Gdx.input.setInputProcessor(new InputAdapter() {
 			public boolean touchDown (int x, int y, int pointer, int button) {
+				Gdx.app.log(TAG, "Touchdown, starttime: "+startAnimationTime);
 				// Save the first time that the user touches the screen
 				if(startAnimationTime ==-1)
 				{
@@ -121,10 +123,11 @@ public class CometLander extends ApplicationAdapter {
 			// Get the time difference at this frame from the beginning
 			long timeDiff = timeObj.getTime() - startAnimationTime;
 			timeDiff = (timeDiff < 0 ? -timeDiff : timeDiff); // If difference is negative, make positive
-			if(timeDiff > 1000) {
+			Gdx.app.log(TAG, "Time Diff: "+timeDiff);
+			if(timeDiff > 48) {
 				spaceship.setTexture(ship3);
 				spaceship.draw(batch);
-			} else if (timeDiff >500) {
+			} else if (timeDiff >30) {
 				spaceship.setTexture(ship2);
 				spaceship.draw(batch);
 			} else {
