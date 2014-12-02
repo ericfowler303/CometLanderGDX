@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -23,6 +24,7 @@ public class CometLander extends ApplicationAdapter {
 	private static final String TAG = "CometLander";
 	Random rng = new Random();
 	Date timeObj = new Date();
+	BitmapFont statsFont;
 	long startAnimationTime = -1; // init with null time value
 	World moonWorld;
 	SpriteBatch batch;
@@ -39,6 +41,9 @@ public class CometLander extends ApplicationAdapter {
 	
 	@Override
 	public void create () {
+		// Font to use for the stats box
+		statsFont = new BitmapFont();
+
 		Box2D.init(); // Needed to start using physics
 		// Acceleration due to gravity on the moon is 1.62 m/s^2, use that value for the world gravity setting
 		// Create the World to reflect that gravity
@@ -57,6 +62,8 @@ public class CometLander extends ApplicationAdapter {
 			@Override
 			public boolean touchDragged (int x, int y, int pointer) {
 				startAnimationTime++;
+				// While the user is touching the screen apply a Force to the object to counteract gravity
+				spaceShipBody.applyForceToCenter(0.0f,7.5f, true);
 				return true;
 			}
 
@@ -110,6 +117,12 @@ public class CometLander extends ApplicationAdapter {
 
 		// Animate the spaceship image based on touch input
 		ChangeSpaceshipTexture(startAnimationTime);
+
+		// In the upper left corner display stats on the ship velocity
+		statsFont.setColor(0.133f, 1.0f,0.227f,1.0f); // a bright green
+		statsFont.setScale(2.0f);
+		//Gdx.app.log(TAG, String.valueOf(spaceShipBody.getLinearVelocity().y));
+		statsFont.draw(batch, "velocity: "+ String.valueOf(spaceShipBody.getLinearVelocity().y), 20,Gdx.graphics.getHeight()-20);
 
 		batch.end();
 		// update the physics at 60fps regardless of rendering speed
