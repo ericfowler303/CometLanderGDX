@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Date;
 
+import static com.badlogic.gdx.math.MathUtils.cos;
+import static com.badlogic.gdx.math.MathUtils.sin;
+
 public class CometLander extends ApplicationAdapter {
 	private static final String TAG = "CometLander";
 	private static final float DEGTORAD = 57.296f;
@@ -69,7 +72,11 @@ public class CometLander extends ApplicationAdapter {
 			public boolean touchDragged (int x, int y, int pointer) {
 				startAnimationTime++;
 				// While the user is touching the screen apply a Force to the object to counteract gravity
-				spaceShipBody.applyForceToCenter(0.0f,7.5f, true);
+				float forceX = sin(spaceShipBody.getAngle());
+				float forceY = cos(spaceShipBody.getAngle());
+				// Inverse the force of x to thrust in the opposite direction
+				forceX = forceX*-1;
+				spaceShipBody.applyForceToCenter(forceX*8f,forceY*8f, true);
 				return true;
 			}
 
